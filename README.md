@@ -36,6 +36,6 @@ For a description of Standard mode and the two generated profiles, see [`docs/st
 - Display accuracy depends on the source profile, display state, and operating-system color-management behavior. Verify profiles on the intended system and display.
 ---
 ## License
-Copyright (C) 2026 WhARTS Ltd.
+Copyright © 2026 WhARTS Ltd.
 
 Licensed under the GNU Affero General Public License, version 3 or (at your option) any later version. See [`LICENSE`](LICENSE).
