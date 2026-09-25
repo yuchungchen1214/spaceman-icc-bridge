@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+build/
+dist/
+output/
+releases/
+handoff/
+*.dmg
+*.zip
+.DS_Store
+*.log
+config.json
+config-v110.json
+rw.*.dmg
+.Python
+/SpaceMan ICC Bridge.spec
+/SpaceMan-ICC-Bridge.spec
+/SpaceMan-ICC-Bridge-*-windows-source.zip
+/SpaceMan-ICC-Bridge-*.dmg
+/test_windows.py
+/packaging/windows/HANDOFF-*.md
+/packaging/windows/make_handoff.py

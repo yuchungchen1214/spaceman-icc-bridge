@@ -1,0 +1,11 @@
+File: runtime/MHC2Gen
+Platform: macOS arm64
+Format: self-contained .NET 8 executable
+MHC2Gen version: 1.0.0+82ebd2726afde770627cf45456ef55c83392c840
+Upstream: https://github.com/dantmnf/MHC2
+License: Unlicense (see THIRD_PARTY_NOTICES.md)
+SHA-256: f8f339a63594e6670112436eec55e591a839a5eb05efb83ecec207841b0198e7
+
+This is the macOS helper distributed with SpaceMan ICC Bridge. The upstream
+project and version are recorded above; this file identifies the exact binary
+included in this source release.

@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+export DYLD_LIBRARY_PATH="$HERE/runtime${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+exec "$HERE/runtime/MHC2Gen" "$@"

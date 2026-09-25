@@ -1,0 +1,8 @@
+Upstream: https://github.com/dantmnf/MHC2
+Release: https://github.com/dantmnf/MHC2/releases/tag/ci-build
+Download: https://github.com/dantmnf/MHC2/releases/download/ci-build/MHC2Gen.zip
+Version: 1.0.0+82ebd2726afde770627cf45456ef55c83392c840
+Downloaded: 2026-09-17
+Archive SHA256 (verified against GitHub asset digest):
+b8a462320816266bb221c493662e83fd0901ab6589bccd5e6699be106b40cb35
+This is the upstream development/pre-release build.
