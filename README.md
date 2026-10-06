@@ -29,7 +29,7 @@ SpaceMan ICC Bridge creates a regular display ICC profile for macOS ColorSync an
 - Apple Silicon: [`SpaceMan-ICC-Bridge-1.1.0-macos-arm.dmg`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.1.0/SpaceMan-ICC-Bridge-1.1.0-macos-arm.dmg)
 
 **Windows**
-- x64: [`SpaceMan ICC Bridge.exe`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.1.0/SpaceMan%20ICC%20Bridge.exe)
+- x64: [`SpaceMan ICC Bridge.exe`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.1.0/SpaceMan.ICC.Bridge.exe)
 
 Optional: Verify downloaded files with [`SHA256.txt`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.1.0/SHA256.txt).
 
