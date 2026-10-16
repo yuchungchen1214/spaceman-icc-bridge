@@ -1,4 +1,4 @@
-"""Functional 1.1.0 development UI; released entry point remains unchanged."""
+"""Functional 1.2.0 development UI; released entry point remains unchanged."""
 import sys, os, json
 from pathlib import Path
 
@@ -286,6 +286,8 @@ class PreviewWindow(existing.Window):
 
 def main():
     app = QApplication(sys.argv)
+    app.setApplicationName('SpaceMan ICC Bridge')
+    app.setApplicationVersion('1.2.0')
     appearance = AppearanceController(
         app, QSettings('WhARTS', 'SpaceMan ICC Bridge'))
     app.appearance_controller = appearance

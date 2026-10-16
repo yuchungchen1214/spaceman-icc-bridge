@@ -2,8 +2,11 @@
 
 import re
 
+from pathlib import Path
+
 from PySide6.QtCore import QObject, Qt, Signal
-from PySide6.QtGui import QAction, QActionGroup, QColor, QPalette
+from PySide6.QtGui import QAction, QActionGroup, QColor, QPalette, QPixmap
+from PySide6.QtWidgets import QDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
 
 APPEARANCE_DARK = "dark"
@@ -188,4 +191,66 @@ def add_appearance_menu(window, controller):
     actions[controller.mode].setChecked(True)
     controller.modeChanged.connect(
         lambda selected: actions[selected].setChecked(True))
+    help_menu.addSeparator()
+    about_action = QAction("About", window)
+    about_action.setMenuRole(QAction.MenuRole.NoRole)
+    about_action.triggered.connect(lambda: show_about_dialog(window))
+    help_menu.addAction(about_action)
     return appearance_menu
+
+
+def show_about_dialog(parent):
+    dialog = QDialog(parent)
+    dialog.setWindowTitle("About")
+    dialog.setMinimumWidth(410)
+
+    layout = QVBoxLayout(dialog)
+    layout.setContentsMargins(20, 16, 20, 16)
+    layout.setSpacing(14)
+    content = QHBoxLayout()
+    content.setSpacing(18)
+
+    icon = QLabel()
+    icon_path = Path(__file__).resolve().parent.parent / "assets" / "icon-sp.png"
+    pixmap = QPixmap(str(icon_path))
+    if not pixmap.isNull():
+        scale = max(1.0, parent.devicePixelRatioF())
+        pixel_size = round(88 * scale)
+        pixmap = pixmap.scaled(pixel_size, pixel_size,
+                               Qt.AspectRatioMode.KeepAspectRatio,
+                               Qt.TransformationMode.SmoothTransformation)
+        pixmap.setDevicePixelRatio(scale)
+        icon.setPixmap(pixmap)
+        icon.setFixedSize(88, 88)
+    content.addWidget(icon, alignment=Qt.AlignmentFlag.AlignTop)
+
+    details = QVBoxLayout()
+    details.setSpacing(6)
+    title = QLabel("SpaceMan ICC Bridge")
+    title.setStyleSheet("font-size:16px; font-weight:600;")
+    from PySide6.QtWidgets import QApplication
+    version = QApplication.applicationVersion() or "1.2.0"
+    details.addWidget(title)
+    details.addWidget(QLabel(f"Ver. {version}"))
+    details.addWidget(QLabel("© 2026 WhARTS Ltd."))
+
+    license_link = QLabel(
+        'Licensed under the <a href="https://www.gnu.org/licenses/agpl-3.0.txt">'
+        'AGPL-3.0-or-later</a>. Provided without warranty.'
+    )
+    license_link.setWordWrap(True)
+    license_link.setOpenExternalLinks(True)
+    details.addWidget(license_link)
+    source_link = QLabel(
+        '<a href="https://github.com/yuchungchen1214/spaceman-icc-bridge">Source code</a>'
+    )
+    source_link.setOpenExternalLinks(True)
+    details.addWidget(source_link)
+    content.addLayout(details, 1)
+    layout.addLayout(content)
+
+    ok_button = QPushButton("OK")
+    ok_button.setFixedWidth(100)
+    ok_button.clicked.connect(dialog.accept)
+    layout.addWidget(ok_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+    dialog.exec()

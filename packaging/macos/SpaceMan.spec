@@ -1,4 +1,4 @@
-# macOS 1.1.0: isolated build, preserving earlier release artifacts.
+# macOS 1.2.0: isolated build, preserving earlier release artifacts.
 from pathlib import Path
 root = Path(SPECPATH).parents[1]
 a = Analysis([str(root/'preview_v110.py')], pathex=[str(root)],
@@ -17,7 +17,7 @@ exe = EXE(pyz,a.scripts,[],exclude_binaries=True,name='SpaceMan ICC Bridge',
 coll = COLLECT(exe,a.binaries,a.datas,strip=False,upx=False,name='SpaceMan ICC Bridge')
 app = BUNDLE(coll,name='SpaceMan ICC Bridge.app',icon=str(root/'assets/icon-sp.icns'),
              bundle_identifier='com.spaceman.iccbridge',
-             info_plist={'CFBundleShortVersionString':'1.1.0',
-                         'CFBundleVersion':'1.1.0',
+             info_plist={'CFBundleShortVersionString':'1.2.0',
+                         'CFBundleVersion':'1.2.0',
                          'UIDesignRequiresCompatibility':True,
                          'NSHighResolutionCapable':True})

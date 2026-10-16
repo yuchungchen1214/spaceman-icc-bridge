@@ -53,4 +53,4 @@ Optional: Verify downloaded files with [`SHA256.txt`](https://github.com/yuchung
 
 Copyright © 2026 WhARTS Ltd.
 
-Licensed under the GNU Affero General Public License, version 3 or (at your option) any later version. See [`LICENSE`](LICENSE).
+Licensed under the [GNU Affero General Public License 3.0 or later (AGPL-3.0-or-later)](https://www.gnu.org/licenses/agpl-3.0.html). See [`LICENSE`](LICENSE).
