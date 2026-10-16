@@ -4,9 +4,9 @@ from pathlib import Path
 
 from src.macos_appearance import configure_native_appearance
 configure_native_appearance()
-from src.ui_theme import apply_fixed_surface_colors
+from src.ui_theme import AppearanceController, add_appearance_menu
 
-from PySide6.QtCore import QLocale, Qt, QThread, Signal
+from PySide6.QtCore import QLocale, Qt, QThread, Signal, QSettings
 from PySide6.QtGui import QIcon, QDoubleValidator
 from PySide6.QtWidgets import (
     QApplication, QComboBox, QHBoxLayout, QLabel, QMessageBox,
@@ -286,9 +286,13 @@ class PreviewWindow(existing.Window):
 
 def main():
     app = QApplication(sys.argv)
-    apply_fixed_surface_colors(app)
+    appearance = AppearanceController(
+        app, QSettings('WhARTS', 'SpaceMan ICC Bridge'))
+    app.appearance_controller = appearance
     app.setWindowIcon(QIcon(str(existing.APP / 'assets' / 'icon-sp.png')))
     window = PreviewWindow()
+    appearance.sync_widget_styles(window)
+    add_appearance_menu(window, appearance)
     window.show()
     if '--smoke-test' in sys.argv:
         import tempfile
