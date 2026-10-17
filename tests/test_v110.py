@@ -52,7 +52,7 @@ class UiTests(unittest.TestCase):
         import preview_v110 as ui
         from src.build_icc_from_bcs import tag_block
         app=QApplication.instance() or QApplication([])
-        with tempfile.TemporaryDirectory() as tmp, patch.object(ui.existing,'save'), patch.object(ui.QMessageBox,'information') as done, patch.object(ui.QMessageBox,'critical') as error:
+        with tempfile.TemporaryDirectory() as tmp, patch.object(ui.existing,'save'), patch.object(ui.QMessageBox,'information') as done, patch.object(ui.QMessageBox,'critical') as error, patch.object(ui.existing,'choose_black_point') as choose_black:
             tmp=Path(tmp)
             w=ui.PreviewWindow(); w.timer.stop(); w.show(); app.processEvents()
             try:
@@ -64,6 +64,7 @@ class UiTests(unittest.TestCase):
                 while w.busy and time.monotonic()<deadline:
                     app.processEvents(); time.sleep(.01)
                 self.assertFalse(w.busy)
+                choose_black.assert_not_called()
                 self.assertFalse(error.called,error.call_args)
                 self.assertIn(b'MHC2',read_tags((tmp/'standard-mhc2.icc').read_bytes()))
                 ref=ROOT/'output/AdobeRGB1998-mhc2-windows-test-v4.icc'
@@ -95,6 +96,35 @@ class UiTests(unittest.TestCase):
                 self.assertIn(b'vcgt',read_tags((tmp/'measurement.icc').read_bytes()))
                 self.assertIn(b'MHC2',read_tags((tmp/'measurement-mhc2.icc').read_bytes()))
                 self.assertEqual(done.call_count,2)
+
+                # Missing black lets the user cancel or choose either reference.
+                no_black=tmp/'synthetic-no-black.csv'
+                no_black.write_text('R,G,B,X,Y,Z\n'+'\n'.join(','.join(map(str,r)) for r in rows[1:]))
+                source_before=no_black.read_bytes()
+                w.drop_source('bcs_dir',('.csv',),[str(no_black)])
+                w.name.setText('missing-black-cancel')
+                choose_black.return_value=None
+                w.generate.click()
+                choose_black.assert_called_once()
+                self.assertFalse((tmp/'missing-black-cancel.icc').exists())
+                self.assertEqual(no_black.read_bytes(),source_before)
+
+                w.name.setText('missing-black-darkest')
+                choose_black.return_value='darkest'
+                w.generate.click()
+                self.assertFalse(error.called,error.call_args)
+                self.assertIn(b'vcgt',read_tags((tmp/'missing-black-darkest.icc').read_bytes()))
+                self.assertIn(b'MHC2',read_tags((tmp/'missing-black-darkest-mhc2.icc').read_bytes()))
+                darkest_trc=read_tags((tmp/'missing-black-darkest.icc').read_bytes())[b'rTRC']
+
+                w.name.setText('missing-black-zero')
+                choose_black.return_value='zero'
+                w.generate.click()
+                self.assertFalse(error.called,error.call_args)
+                zero_trc=read_tags((tmp/'missing-black-zero.icc').read_bytes())[b'rTRC']
+                self.assertNotEqual(darkest_trc,zero_trc)
+                self.assertEqual(choose_black.call_count,3)
+                self.assertEqual(no_black.read_bytes(),source_before)
                 self.assertEqual((w.width(),w.height()),(560,560))
             finally:
                 if hasattr(w,'worker'): w.worker.wait()

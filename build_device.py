@@ -2,7 +2,7 @@ import argparse
 import csv
 import tempfile
 import xml.etree.ElementTree as ET
-from src.build_icc_from_bcs import build_profile
+from src.build_icc_from_bcs import build_profile, has_black_measurement, read_bcs
 from pathlib import Path
 
 def csv_to_bcs(path):
@@ -45,7 +45,21 @@ def ti3_to_bcs(path):
         for k in keys[3:]: ET.SubElement(x,k[-1]).text=row[k]
     tmp=tempfile.NamedTemporaryFile(suffix='.bcs',delete=False); tmp.close(); ET.ElementTree(root).write(tmp.name,encoding='utf-8',xml_declaration=True); return Path(tmp.name)
 
-def build_device(measurement, raw, out):
+def measurement_has_black(measurement):
+    """Check BCS/BPC/CSV/TI3 input for an explicit RGB (0, 0, 0) sample."""
+    measurement = Path(measurement)
+    temporary = None
+    try:
+        if measurement.suffix.lower() == '.csv':
+            temporary = csv_to_bcs(measurement)
+        elif measurement.suffix.lower() == '.ti3':
+            temporary = ti3_to_bcs(measurement)
+        return has_black_measurement(read_bcs(temporary or measurement))
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+def build_device(measurement, raw, out, black_point="require"):
     measurement, raw, out = map(Path, (measurement, raw, out))
     temporary = None
     try:
@@ -54,7 +68,7 @@ def build_device(measurement, raw, out):
         elif measurement.suffix.lower() == '.ti3':
             temporary = ti3_to_bcs(measurement)
         out.parent.mkdir(parents=True, exist_ok=True)
-        build_profile(temporary or measurement, raw, out)
+        build_profile(temporary or measurement, raw, out, black_point=black_point)
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
@@ -64,5 +78,6 @@ if __name__ == '__main__':
     ap.add_argument('--bcs', required=True)
     ap.add_argument('--raw', required=True)
     ap.add_argument('--out', required=True)
+    ap.add_argument('--black-point', choices=('darkest', 'zero'), help='When no RGB=(0,0,0) measurement exists, use the darkest measured grayscale patch or assume XYZ=(0,0,0).')
     args = ap.parse_args()
-    build_device(args.bcs, args.raw, args.out)
+    build_device(args.bcs, args.raw, args.out, black_point=args.black_point or 'require')

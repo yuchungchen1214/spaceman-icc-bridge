@@ -1,8 +1,11 @@
 import json, subprocess, sys, os
-from build_device import build_device
+from build_device import build_device, measurement_has_black
 from src.build_mhc2_from_cube import apply_cube_gray_to_mhc2
+from src.ui_theme import (
+ AppearanceController, add_appearance_menu, current_appearance_color,
+)
 from pathlib import Path
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QSettings
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication,QMainWindow,QWidget,QLabel,QLineEdit,QPushButton,QListWidget,QFileDialog,QMessageBox,QVBoxLayout,QHBoxLayout,QMenu
 APP=Path(__file__).resolve().parent
@@ -21,6 +24,20 @@ def save():
   CFG.parent.mkdir(parents=True,exist_ok=True); CFG.write_text(json.dumps(S,ensure_ascii=False,indent=2),encoding='utf-8')
  except OSError:
   pass
+
+def choose_black_point(parent):
+ prompt=QMessageBox(parent)
+ prompt.setWindowTitle('Black point not measured')
+ prompt.setText('No measurement at RGB (0, 0, 0) was found. Choose a black-point reference for TRC generation.')
+ darkest=prompt.addButton('Use darkest measured point',QMessageBox.ButtonRole.AcceptRole)
+ zero=prompt.addButton('Assume XYZ = (0, 0, 0)',QMessageBox.ButtonRole.ActionRole)
+ prompt.addButton(QMessageBox.StandardButton.Cancel)
+ prompt.setDefaultButton(darkest)
+ prompt.exec()
+ if prompt.clickedButton() is darkest: return 'darkest'
+ if prompt.clickedButton() is zero: return 'zero'
+ return None
+
 class DropList(QListWidget):
  def __init__(self,callback): super().__init__(); self.callback=callback; self.setAcceptDrops(True)
  def _hover(self,on):
@@ -37,14 +54,14 @@ class DropList(QListWidget):
 class DropPath(QLineEdit):
  def __init__(self,callback): super().__init__(); self.callback=callback; self.setAcceptDrops(True); self._edit_original=''
  def mouseDoubleClickEvent(self,e):
-  self._edit_original=self.text(); self.setReadOnly(False); self.setStyleSheet('QLineEdit{color:#fff} QLineEdit[dragActive="true"]{background:#30343a;border:2px solid #88a8c8}'); super().mouseDoubleClickEvent(e); self.selectAll()
+  self._edit_original=self.text(); self.setReadOnly(False); self.setStyleSheet(f'QLineEdit{{color:{current_appearance_color("#fff")}}} QLineEdit[dragActive="true"]{{background:#30343a;border:2px solid #88a8c8}}'); super().mouseDoubleClickEvent(e); self.selectAll()
  def finish_edit(self,commit=True):
   if self.isReadOnly(): return
   if not commit: self.setText(self._edit_original)
   else:
    p=self.text().strip()
    if p: S['output_dir']=p; save()
-  self.setReadOnly(True); self.setStyleSheet('QLineEdit{color:#888} QLineEdit[dragActive="true"]{background:#30343a;border:2px solid #88a8c8}')
+  self.setReadOnly(True); self.setStyleSheet(f'QLineEdit{{color:{current_appearance_color("#888")}}} QLineEdit[dragActive="true"]{{background:#30343a;border:2px solid #88a8c8}}')
  def keyPressEvent(self,e):
   if e.key()==Qt.Key.Key_Escape:
    self.finish_edit(False); self.clearFocus(); return
@@ -133,8 +150,12 @@ class Window(QMainWindow):
    if Path(r).resolve() in (ordinary.resolve(),mhc.resolve()): raise ValueError('Choose an output folder or name that does not overwrite the raw ICC.')
    exe=APP/'tools'/'mhc2gen'/('MHC2Gen.exe' if os.name == 'nt' else 'MHC2Gen')
    if not exe.is_file(): raise FileNotFoundError(f'MHC2Gen is missing: {exe}')
+   black_point='require'
+   if not measurement_has_black(b):
+    black_point=choose_black_point(self)
+    if black_point is None: return
    out.mkdir(parents=True,exist_ok=True)
-   build_device(b,r,ordinary)
+   build_device(b,r,ordinary,black_point=black_point)
    result=subprocess.run([str(exe),'sdr-csc','--source-gamut=sRGB','--keep-whitepoint=Bradford','--profile-desc',mhc.name,str(ordinary),str(mhc)],cwd=out,capture_output=True,text=True,encoding='utf-8',errors='replace',creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
    if result.returncode: raise RuntimeError(result.stderr or result.stdout or f'MHC2Gen exited with code {result.returncode}')
    if not mhc.is_file(): raise RuntimeError('MHC2Gen did not create the output profile.')
@@ -143,4 +164,4 @@ class Window(QMainWindow):
   except Exception as e: QMessageBox.critical(self,'Generation failed',str(e))
 
 def main():
- app=QApplication(sys.argv); icon=APP/'assets'/'icon-sp.png'; app.setWindowIcon(QIcon(str(icon))) if icon.exists() else None; w=Window(); w.show(); sys.exit(app.exec())
+ app=QApplication(sys.argv); appearance=AppearanceController(app,QSettings('WhARTS','SpaceMan ICC Bridge')); app.appearance_controller=appearance; icon=APP/'assets'/'icon-sp.png'; app.setWindowIcon(QIcon(str(icon))) if icon.exists() else None; w=Window(); appearance.sync_widget_styles(w); add_appearance_menu(w,appearance); w.show(); sys.exit(app.exec())

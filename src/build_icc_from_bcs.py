@@ -72,6 +72,10 @@ def read_bcs(path):
         rows.append((rgb, XYZ))
     return rows
 
+def has_black_measurement(rows):
+    """Return whether the measurement set contains an RGB black patch."""
+    return any(all(abs(v) < 1e-7 for v in rgb) for rgb, _xyz in rows)
+
 def read_tags(data):
     n = struct.unpack_from(">I", data, 128)[0]
     tags = {}
@@ -119,18 +123,33 @@ def tag_block(tags):
         pos = len(header) + len(body)
     return bytes(header + body)
 
-def build_profile(BCS, RAW, OUT):
+def build_profile(BCS, RAW, OUT, black_point="require"):
     rows = read_bcs(BCS)
     raw_tags = read_tags(RAW.read_bytes())
     assert rows and b"vcgt" in raw_tags, "BCS 或 raw ICC 缺少必要資料"
+
+    if not has_black_measurement(rows):
+        if black_point == "require":
+            raise ValueError(
+                "No black measurement at RGB (0, 0, 0) was found. "
+                "Choose the darkest measured grayscale point or assume XYZ=(0,0,0)."
+            )
+        if black_point == "zero":
+            rows.append(((0.0, 0.0, 0.0), (0.0, 0.0, 0.0)))
+        elif black_point != "darkest":
+            raise ValueError("black_point must be 'require', 'darkest', or 'zero'.")
 
     white = max(rows, key=lambda r: sum(r[0]))[1]
     prim = []
     native_prim = []
     curves = []
     gray = sorted((r[0][0], r[1][1]) for r in rows if abs(r[0][0]-r[0][1]) < 1e-7 and abs(r[0][1]-r[0][2]) < 1e-7)
+    if len(gray) < 2:
+        raise ValueError("At least two neutral grayscale measurements are required to build a TRC.")
     black_y = gray[0][1]
     white_y = gray[-1][1]
+    if white_y <= black_y:
+        raise ValueError("Grayscale measurements do not have an increasing luminance range.")
     gray_curve = resample([(x, max(0.0, min(1.0, (y-black_y)/(white_y-black_y)))) for x, y in gray])
     for ch in range(3):
         candidates = [r for r in rows if sum(r[0][i] for i in range(3) if i != ch) < 1e-6]

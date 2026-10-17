@@ -1,6 +1,7 @@
 """Display Manager Pro-style appearance switching with native Qt controls."""
 
 import re
+import sys
 
 from pathlib import Path
 
@@ -170,7 +171,9 @@ class AppearanceController(QObject):
 
 def add_appearance_menu(window, controller):
     """Add Help > Appearance, matching Display Manager Pro's menu location."""
-    help_menu = window.menuBar().addMenu("Help")
+    # AppKit injects its Help search item for a menu named exactly "Help".
+    # A trailing space preserves the visible title while suppressing that item.
+    help_menu = window.menuBar().addMenu("Help " if sys.platform == "darwin" else "Help")
     appearance_menu = help_menu.addMenu("Appearance")
     group = QActionGroup(window)
     group.setExclusive(True)

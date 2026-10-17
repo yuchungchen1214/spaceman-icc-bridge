@@ -6,7 +6,9 @@ __pycache__/
 build/
 dist/
 output/
-releases/
+# Keep the archive index in source control, but leave release binaries local.
+releases/*
+!releases/README.md
 handoff/
 *.dmg
 *.zip

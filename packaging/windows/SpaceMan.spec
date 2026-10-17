@@ -1,4 +1,4 @@
-"""Windows x64 single-file build, following the verified 1.0.1 layout."""
+"""Windows x64 single-file build for SpaceMan ICC Bridge 1.2.0."""
 from pathlib import Path
 import PySide6
 

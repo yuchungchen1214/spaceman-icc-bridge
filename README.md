@@ -14,8 +14,10 @@ SpaceMan ICC Bridge creates a regular display ICC profile for macOS ColorSync an
 - Read ColourSpace BPC/BCS, DisplayCAL/Argyll TI3, and supported CSV measurement files
 - Create profiles from a standard matrix/TRC display ICC without measurement files
 - Set target gamut, white point, and gamma
+- Choose how to handle a missing black measurement when building a profile
 - Generate both `name.icc` and `name-mhc2.icc` on macOS and Windows
 - Drag and drop files or folders into the source lists
+- Switch between light, dark, and system appearance
 
 ---
 
@@ -26,12 +28,12 @@ SpaceMan ICC Bridge creates a regular display ICC profile for macOS ColorSync an
 ### Applications
 
 **macOS**
-- Apple Silicon: [`SpaceMan-ICC-Bridge-1.1.0-macos-arm.dmg`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.1.0/SpaceMan-ICC-Bridge-1.1.0-macos-arm.dmg)
+- Apple Silicon: [`SpaceMan-ICC-Bridge-1.2.0-macos-arm.dmg`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.2.0/SpaceMan-ICC-Bridge-1.2.0-macos-arm.dmg)
 
 **Windows**
-- x64: [`SpaceMan ICC Bridge.exe`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.1.0/SpaceMan.ICC.Bridge.exe)
+- x64: [`SpaceMan ICC Bridge.exe`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.2.0/SpaceMan%20ICC%20Bridge.exe)
 
-Optional: Verify downloaded files with [`SHA256.txt`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.1.0/SHA256.txt).
+Optional: Verify downloaded files with [`SHA256.txt`](https://github.com/yuchungchen1214/spaceman-icc-bridge/releases/download/v1.2.0/SHA256.txt).
 
 ### Documentation
 
